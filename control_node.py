@@ -86,6 +86,6 @@ if __name__ == '__main__':
     thread4 = threading.Thread(target=data3.run)
     thread4.start()
 
-    rq.post("http://localhost:5000/add/5001")
-    rq.post("http://localhost:5000/add/5002")
-    rq.post("http://localhost:5000/add/5003")
+    rq.post("http://172.16.200.110:5000/add/5001")
+    rq.post("http://172.16.200.110:5000/add/5002")
+    rq.post("http://172.16.200.110:5000/add/5003")
