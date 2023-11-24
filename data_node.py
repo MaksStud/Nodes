@@ -3,7 +3,7 @@ from flask import Flask, make_response, request
 
 
 class DataNode:
-    def __init__(self, user_port, user_host='0.0.0.0'):
+    def __init__(self, user_port=5000, user_host='0.0.0.0'):
         self.data = Queue()
         self.copy_data = Queue()
         self.port = user_port
