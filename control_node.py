@@ -5,7 +5,8 @@ import threading
 
 
 class ControlNode:
-    def __init__(self, port):
+    def __init__(self, port, user_host='0.0.0.0'):
+        self.user_host = user_host
         self.port = port
         self.stats = {}
         self.node_list = []
@@ -40,37 +41,38 @@ class ControlNode:
             address_to_copy = self.node_list[0]
         else:
             address_to_copy = self.node_list[index_to_copy+1]
-        result = rq.post(f"http://localhost:{address_to_send}/send", data=request.data.decode("utf-8"))
-        result_copy = rq.post(f"http://localhost:{address_to_copy}/send_copy", data=request.data.decode("utf-8"))
+        result = rq.post(f"http://{self.user_host}:{address_to_send}/send", data=request.data.decode("utf-8"))
+        result_copy = rq.post(f"http://{self.user_host}:{address_to_copy}/send_copy", data=request.data.decode("utf-8"))
         return make_response()
 
     def receive_data(self):
         self.get_stats()
         address_to_recieve = max(self.stats, key=self.stats.get)
-        result = rq.get(f"http://localhost:{address_to_recieve}/receive")
+        result = rq.get(f"http://{self.user_host}:{address_to_recieve}/receive")
         print(result.text)
         return result.text.encode("utf-8")
  
     def get_stats(self):
         self.stats = {}
         for node in self.node_list:
-            result = rq.get(f"http://localhost:{node}/stats")
+            result = rq.get(f"http://{self.user_host}:{node}/stats")
             if result.status_code == 200: 
                 node_stats = int(result.text)
-                self.stats[node]= node_stats
+                self.stats[node] = node_stats
             else:
                 self.stats.pop(node)
 
         return self.stats
     
     def run(self):
-        self.app.run(port=self.port, threaded=True)
-    
+        self.app.run(host=self.user_host, port=self.port, threaded=True)
+
+
 if __name__ == '__main__':
-    control_node = ControlNode(5000)
-    data1 = DataNode(5001)
-    data2 = DataNode(5002)
-    data3 = DataNode(5003)
+    control_node = ControlNode(5000, '172.16.200.110')
+    data1 = DataNode(5001, '172.16.200.110')
+    data2 = DataNode(5002, '172.16.200.110')
+    data3 = DataNode(5003, '172.16.200.110')
     
     thread1 = threading.Thread(target=control_node.run)
     thread1.start()

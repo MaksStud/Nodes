@@ -3,10 +3,11 @@ from flask import Flask, make_response, request
 
 
 class DataNode:
-    def __init__(self, user_port):
+    def __init__(self, user_port, user_host='0.0.0.0'):
         self.data = Queue()
         self.copy_data = Queue()
         self.port = user_port
+        self.user_host = user_host
 
         self.app = Flask(__name__)
         self.app.add_url_rule('/receive', 'get_data', self.get_data)
@@ -36,7 +37,7 @@ class DataNode:
         return str(self.data.qsize())
 
     def run(self):
-        self.app.run(port=self.port)
+        self.app.run(host=self.user_host, port=self.port)
 
 
 if __name__ == '__main__':
