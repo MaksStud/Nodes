@@ -5,7 +5,7 @@ import threading
 
 
 class ControlNode:
-    def __init__(self, port, user_host='0.0.0.0'):
+    def __init__(self, port=5000, user_host='0.0.0.0'):
         self.user_host = user_host
         self.port = port
         self.stats = {}
