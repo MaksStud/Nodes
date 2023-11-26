@@ -23,13 +23,10 @@ class DataNode:
         return make_response()
 
     def transferring_data(self):
-        if self.data.qsize() > 0:
-            while not self.copy_data.empty():
-                element = self.copy_data.get()
-                self.data.put(element)
-                return 'True'
-        else:
-            return 'False'
+        while not self.copy_data.empty():
+            element = self.copy_data.get()
+            self.data.put(element)
+        return 'Transfer is done'
 
     def set_copy_data(self):
         new_copy = request.data.decode("utf-8")
