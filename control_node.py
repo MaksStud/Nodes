@@ -69,10 +69,12 @@ class ControlNode:
 
 
 if __name__ == '__main__':
-    control_node = ControlNode(5000, '172.16.200.110')
-    data1 = DataNode(5001, '172.16.200.110')
-    data2 = DataNode(5002, '172.16.200.110')
-    data3 = DataNode(5003, '172.16.200.110')
+    ip = '172.16.200.110'
+
+    control_node = ControlNode(5000, ip)
+    data1 = DataNode(5001, ip)
+    data2 = DataNode(5002, ip)
+    data3 = DataNode(5003, ip)
     
     thread1 = threading.Thread(target=control_node.run)
     thread1.start()
@@ -86,6 +88,6 @@ if __name__ == '__main__':
     thread4 = threading.Thread(target=data3.run)
     thread4.start()
 
-    rq.post("http://172.16.200.110:5000/add/5001")
-    rq.post("http://172.16.200.110:5000/add/5002")
-    rq.post("http://172.16.200.110:5000/add/5003")
+    rq.post(f"http://{ip}/add/5001")
+    rq.post(f"http://{ip}/add/5002")
+    rq.post(f"http://{ip}/add/5003")
