@@ -42,7 +42,7 @@ class ControlNode:
         else:
             address_to_copy = self.node_list[index_to_copy+1]
         result = rq.post(f"http://{self.user_host}:{address_to_send}/send", data=request.data.decode("utf-8"))
-        result_copy = rq.post(f"http://{self.user_host}:{address_to_copy}/send_copy", data=request.data.decode("utf-8"))
+        result_copy = rq.post(f"http://{self.user_host}:{address_to_copy}/send_copy/{address_to_send}", data=request.data.decode("utf-8"))
         return make_response()
 
     def receive_data(self):
@@ -53,6 +53,8 @@ class ControlNode:
         return result.text.encode("utf-8")
  
     def get_stats(self):
+        first_stats = self.stats
+
         self.stats = {}
         for node in self.node_list:
             result = rq.get(f"http://{self.user_host}:{node}/stats")
@@ -62,6 +64,22 @@ class ControlNode:
             else:
                 self.stats.pop(node)
 
+        if len(first_stats) > len(self.stats):
+            crashed_node = 0
+
+            unpacked_first_stats = list(first_stats.items())
+            unpacked_new_stats = list(self.stats.items())
+            for i in range(len(unpacked_first_stats)):
+                if unpacked_first_stats[i] not in unpacked_new_stats:
+                    crashed_node = i
+
+            if i == len(unpacked_first_stats) - 1:
+                rq.post(f"http://{self.user_host}:{unpacked_first_stats[0][0]}/transfer")
+            else:
+                rq.post(f"http://{self.user_host}:{unpacked_first_stats[i+1][0]}/transfer")
+
+            
+
         return self.stats
     
     def run(self):
@@ -69,7 +87,7 @@ class ControlNode:
 
 
 if __name__ == '__main__':
-    ip = '172.16.200.110'
+    ip = '172.16.193.67'
 
     control_node = ControlNode(5000, ip)
     data1 = DataNode(5001, ip)
@@ -88,6 +106,6 @@ if __name__ == '__main__':
     thread4 = threading.Thread(target=data3.run)
     thread4.start()
 
-    rq.post(f"http://{ip}/add/5001")
-    rq.post(f"http://{ip}/add/5002")
-    rq.post(f"http://{ip}/add/5003")
+    rq.post(f"http://{ip}:5000/add/5001")
+    rq.post(f"http://{ip}:5000/add/5002")
+    rq.post(f"http://{ip}:5000/add/5003")
