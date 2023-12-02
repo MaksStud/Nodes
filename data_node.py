@@ -15,38 +15,54 @@ class DataNode:
         self.app.add_url_rule('/stats', 'workload', self.workload)
         self.app.add_url_rule('/send_copy', 'set_copy_data', self.set_copy_data, methods=['POST'])
         self.app.add_url_rule('/transfer', 'transferring_data', self.transferring_data)
+        self.app.add_url_rule('/receiveFullData', 'get_full_data', self.get_full_data)
 
     def set_data(self):
+        '''Додає нові дані'''
         new_data = request.data.decode('utf-8')
         self.data.put(new_data)
         print(f"add new message = {new_data}")
         return make_response()
 
     def transferring_data(self):
+        '''Переносить комію даних в основний потік'''
         while not self.copy_data.empty():
             element = self.copy_data.get()
             self.data.put(element)
         return 'Transfer is done'
 
     def set_copy_data(self):
+        '''Додає нову комію'''
         new_copy = request.data.decode("utf-8")
         self.copy_data.put(new_copy)
         print(f"add new copy = {new_copy}")
         return make_response()
 
+    def get_full_data(self):
+        '''повертає список всіх елементів черги'''
+        if not self.data.empty():
+            return str(list(self.data.queue))
+        elif self.data.empty():
+            return "no data"
+
     def get_data(self):
+        '''Віддає дані'''
         if self.data.qsize() > 0:
             return str(self.data.get())
         elif self.data.empty():
             return "None"
 
     def workload(self):
+        '''Повертає загруженість'''
         return str(self.data.qsize())
 
     def run(self):
         self.app.run(host=self.user_host, port=self.port)
 
 
-if __name__ == '__main__':
-    data_node = DataNode(5000)
-    data_node.run()
+a = Queue()
+a.put("d")
+a.put("g")
+a.put("h")
+
+
