@@ -67,11 +67,3 @@ class DataNode:
 
     def run(self):
         self.app.run(host=self.user_host, port=self.port)
-
-
-a = Queue()
-a.put("d")
-a.put("g")
-a.put("h")
-
-
