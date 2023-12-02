@@ -12,8 +12,9 @@ class DataNode:
         self.app = Flask(__name__)
         self.app.add_url_rule('/receive', 'get_data', self.get_data)
         self.app.add_url_rule('/send', 'set_data', self.set_data, methods=['POST'])
+        self.app.add_url_rule('/sendNewCopy', 'set_full_copy', self.set_full_copy, methods=['POST'])
         self.app.add_url_rule('/stats', 'workload', self.workload)
-        self.app.add_url_rule('/send_copy', 'set_copy_data', self.set_copy_data, methods=['POST'])
+        self.app.add_url_rule('/sendCopy', 'set_copy_data', self.set_copy_data, methods=['POST'])
         self.app.add_url_rule('/transfer', 'transferring_data', self.transferring_data)
         self.app.add_url_rule('/receiveFullData', 'get_full_data', self.get_full_data)
 
@@ -22,6 +23,14 @@ class DataNode:
         new_data = request.data.decode('utf-8')
         self.data.put(new_data)
         print(f"add new message = {new_data}")
+        return make_response()
+
+    def set_full_copy(self):
+        '''отримвє нову копію ноди'''
+        new_copy = request.data.decode('utf-8')
+        new_copy_data = eval(new_copy)
+        for element in new_copy_data:
+            self.copy_data.put(element)
         return make_response()
 
     def transferring_data(self):
