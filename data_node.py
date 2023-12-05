@@ -15,7 +15,7 @@ class DataNode:
         self.app.add_url_rule('/sendNewCopy', 'set_full_copy', self.set_full_copy, methods=['POST'])
         self.app.add_url_rule('/stats', 'workload', self.workload)
         self.app.add_url_rule('/sendCopy', 'set_copy_data', self.set_copy_data, methods=['POST'])
-        self.app.add_url_rule('/transfer', 'transferring_data', self.transferring_data)
+        self.app.add_url_rule('/transfer', 'transferring_data', self.transferring_data, methods=['POST'])
         self.app.add_url_rule('/receiveFullData', 'get_full_data', self.get_full_data)
 
     def set_data(self):
@@ -27,6 +27,7 @@ class DataNode:
 
     def set_full_copy(self):
         '''отримвє нову копію ноди'''
+        self.copy_data = Queue()
         new_copy = request.data.decode('utf-8')
         new_copy_data = eval(new_copy)
         for element in new_copy_data:
@@ -35,7 +36,7 @@ class DataNode:
 
     def transferring_data(self):
         '''Переносить комію даних в основний потік'''
-        while not self.copy_data.empty():
+        while not self.copy_data.qsize() == 0:
             element = self.copy_data.get()
             self.data.put(element)
         return 'Transfer is done'
@@ -63,7 +64,7 @@ class DataNode:
 
     def workload(self):
         '''Повертає загруженість'''
-        return str(self.data.qsize())
+        return str((self.data.qsize(), self.copy_data.qsize()))
 
     def run(self):
-        self.app.run(host=self.user_host, port=self.port)
+        self.app.run(host=self.user_host, port=self.port, threaded=True, debug=True)
