@@ -58,7 +58,10 @@ class ControlNode:
             address_to_receive_copy = self.node_list[index_to_copy+1]
         result = rq.get(f"http://{self.user_host}:{address_to_receive}/receive")
         result_copy = rq.get(f"http://{self.user_host}:{address_to_receive_copy}/receiveCopy")
-        print(result.text)
+
+        with open("result.txt", "a") as file:
+            file.write(result.text + '\n')
+        
         return result.text.encode("utf-8")
  
     def get_stats(self):

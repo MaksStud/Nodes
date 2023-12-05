@@ -61,7 +61,7 @@ class DataNode:
         if self.data.qsize() > 0:
             return str(self.data.get())
         elif self.data.empty():
-            return "None"
+            return make_response()
 
     def get_data_from_copy(self):
         '''Віддає дані з копії'''
