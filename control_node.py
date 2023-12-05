@@ -50,8 +50,14 @@ class ControlNode:
 
     def receive_data(self):
         self.get_stats()
-        address_to_recieve = max(self.stats.items(), key=lambda item: item[1][0])[0]
-        result = rq.get(f"http://{self.user_host}:{address_to_recieve}/receive")
+        address_to_receive = max(self.stats.items(), key=lambda item: item[1][0])[0]
+        index_to_copy = self.node_list.index(address_to_receive)
+        if index_to_copy == len(self.node_list) - 1:
+            address_to_receive_copy = self.node_list[0]
+        else:
+            address_to_receive_copy = self.node_list[index_to_copy+1]
+        result = rq.get(f"http://{self.user_host}:{address_to_receive}/receive")
+        result_copy = rq.get(f"http://{self.user_host}:{address_to_receive_copy}/receiveCopy")
         print(result.text)
         return result.text.encode("utf-8")
  
