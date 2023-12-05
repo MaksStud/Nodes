@@ -19,14 +19,14 @@ class DataNode:
         self.app.add_url_rule('/receiveFullData', 'get_full_data', self.get_full_data)
 
     def set_data(self):
-        '''Додає нові дані'''
+        """Додає нові дані"""
         new_data = request.data.decode('utf-8')
         self.data.put(new_data)
         print(f"add new message = {new_data}")
         return make_response()
 
     def set_full_copy(self):
-        '''отримвє нову копію ноди'''
+        """отримвє нову копію ноди"""
         new_copy = request.data.decode('utf-8')
         new_copy_data = eval(new_copy)
         for element in new_copy_data:
@@ -34,35 +34,35 @@ class DataNode:
         return make_response()
 
     def transferring_data(self):
-        '''Переносить комію даних в основний потік'''
+        """Переносить комію даних в основний потік"""
         while not self.copy_data.empty():
             element = self.copy_data.get()
             self.data.put(element)
         return 'Transfer is done'
 
     def set_copy_data(self):
-        '''Додає нову комію'''
+        """Додає нову комію"""
         new_copy = request.data.decode("utf-8")
         self.copy_data.put(new_copy)
         print(f"add new copy = {new_copy}")
         return make_response()
 
     def get_full_data(self):
-        '''повертає список всіх елементів черги'''
+        """повертає список всіх елементів черги"""
         if not self.data.empty():
             return str(list(self.data.queue))
         elif self.data.empty():
             return "no data"
 
     def get_data(self):
-        '''Віддає дані'''
+        """Віддає дані"""
         if self.data.qsize() > 0:
             return str(self.data.get())
         elif self.data.empty():
             return "None"
 
     def workload(self):
-        '''Повертає загруженість'''
+        """Повертає загруженість"""
         return str(self.data.qsize())
 
     def run(self):
