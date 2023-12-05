@@ -60,7 +60,8 @@ class ControlNode:
         result_copy = rq.get(f"http://{self.user_host}:{address_to_receive_copy}/receiveCopy")
 
         with open("result.txt", "a") as file:
-            file.write(result.text + '\n')
+            if result.text != '':
+                file.write(result.text + '\n')
         
         return result.text.encode("utf-8")
  
