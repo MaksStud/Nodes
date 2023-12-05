@@ -11,7 +11,7 @@ class DataNode:
 
         self.app = Flask(__name__)
         self.app.add_url_rule('/receive', 'get_data', self.get_data)
-        self.app.add_url_rule('/receive_copy', 'get_data_from_copy', self.get_data_from_copy)
+        self.app.add_url_rule('/receiveСopy', 'get_data_from_copy', self.get_data_from_copy)
         self.app.add_url_rule('/send', 'set_data', self.set_data, methods=['POST'])
         self.app.add_url_rule('/sendNewCopy', 'set_full_copy', self.set_full_copy, methods=['POST'])
         self.app.add_url_rule('/stats', 'workload', self.workload)
