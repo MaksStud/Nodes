@@ -59,7 +59,7 @@ class DataNode:
     def get_data(self):
         '''Віддає дані'''
         if self.data.qsize() > 0:
-            return str(self.data.get())
+            return str(self.data.get()).upper()
         elif self.data.empty():
             return ""
 
