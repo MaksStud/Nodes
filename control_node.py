@@ -1,4 +1,4 @@
-from flask import Flask, request, make_response
+from flask import Flask, request, make_response, render_template
 import requests as rq
 from data_node import DataNode
 import threading
@@ -133,6 +133,9 @@ class ControlNode:
                     break
 
         return self.stats
+
+    def index():
+        return render_template('website/index.html')
     
     def run(self):
         self.app.run(host=self.user_host, port=self.port, threaded=True, debug=True)
