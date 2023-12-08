@@ -139,8 +139,8 @@ class ControlNode:
         return render_template('index.html')
     
     def run(self):
-        self.app.run(host=self.user_host, port=self.port, threaded=True, debug=True)
-
+        self.app.run(host=self.user_host, port=self.port, threaded=True, debug=False)
+        
 
 if __name__ == '__main__':
     with open('IP.txt', 'r') as f:
@@ -148,10 +148,10 @@ if __name__ == '__main__':
 
     control_node = ControlNode(5000, ip)
     
-    #thread = threading.Thread(target=control_node.run)
-    #thread.start()
+    thread = threading.Thread(target=control_node.run)
+    thread.start()
 
-    control_node.run()
+    #control_node.run()
 
     rq.post(f"http://{ip}:5000/add/5001")
     rq.post(f"http://{ip}:5000/add/5002")
