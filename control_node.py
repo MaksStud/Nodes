@@ -18,6 +18,7 @@ class ControlNode:
         self.app.add_url_rule('/stats', 'get_stats', self.get_stats)
         self.app.add_url_rule('/send', 'send_data', self.send_data, methods=['POST'])
         self.app.add_url_rule('/receive', 'receive_data', self.receive_data)
+        self.app.add_url_rule('/', 'index', self.index)
 
     def add_node(self, address):
         if address not in self.node_list:
@@ -134,8 +135,8 @@ class ControlNode:
 
         return self.stats
 
-    def index():
-        return render_template('website/index.html')
+    def index(self):
+        return render_template('index.html')
     
     def run(self):
         self.app.run(host=self.user_host, port=self.port, threaded=True, debug=True)

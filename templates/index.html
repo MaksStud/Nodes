@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+   
+</head>
+<body>
+    <div class="half-container">
+        <div class="text">
+            <h1 class="text">Nodes</h1>
+        </div>
+        <div>
+            <div>
+                <button class="glow-on-hover" type="button" onclick="sendData()">Input Data</button>
+            </div >
+            <div class="input">
+                <input placeholder="Input some text" id="name" name="name" required minlength="4" maxlength="80" size="30" />
+            </div>
+        </div>
+    </div>
+    <div class="half-container">
+        <div>
+            <button class="glow-on-hover" type="button" onclick="receiveData()">Output Data</button>
+            <p id="outputData"></p>
+        </div >
+    </div>
+
+    <script>
+        function sendData() {
+            const data = document.getElementById('name').value;
+
+            fetch('/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/html' // Тип вмісту - JSON
+                    },
+                    body: data // Конвертація об'єкту у JSON-рядок
+                })  // URL, на який ви хочете відправити запит
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Response from server:', data);
+                    // Обробка отриманих даних
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function receiveData() {
+            fetch('/receive')  // URL, на який ви хочете відправити запит
+                .then(response => response.text())
+                .then(data => {
+                    const output = document.getElementById('outputData');
+                    output.innerHTML = data;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
