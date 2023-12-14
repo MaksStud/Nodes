@@ -23,11 +23,13 @@
     </div>
     <div class="half-container">
         <div>
-            <button class="glow-on-hover" type="button" onclick="receiveData()">Output Data</button>
+            <button id='secondButton' class="glow-on-hover" type="button" onclick="receiveData()">Output Data</button>
             <p id="outputData"></p>
+            <img id="chartImage" src="https://cdn-icons-png.flaticon.com/512/4624/4624025.png" alt="Лінійна діаграма">
         </div >
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
         function sendData() {
             const data = document.getElementById('name').value;
@@ -56,6 +58,16 @@
                 })
                 .catch(error => console.error('Error:', error));
         }
+
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('connect', function() {
+            console.log('Connected to the server');
+        });
+
+        socket.on('chart_updated', function(data) {
+            document.getElementById('chartImage').src = 'data:image/png;base64,' + data.chart_image;
+        });
     </script>
 </body>
 </html>

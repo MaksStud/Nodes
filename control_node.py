@@ -2,6 +2,10 @@ from flask import Flask, request, make_response, render_template
 import requests as rq
 from data_node import DataNode
 import threading
+from flask_socketio import SocketIO
+import matplotlib.pyplot as plt
+from io import BytesIO
+import base64
 
 
 class ControlNode:
@@ -12,6 +16,10 @@ class ControlNode:
         self.node_list = []
 
         self.app = Flask(__name__)
+        self.socketio = SocketIO(self.app)
+
+        self.app.config['chart_image'] = ''
+
         self.app.add_url_rule('/add/<address>', 'add_node', self.add_node, methods=['POST'])
         self.app.add_url_rule('/remove/<address>', 'remove_node', self.remove_node, methods=['POST'])
         self.app.add_url_rule('/list', 'list_of_nodes', self.list_of_nodes)
@@ -19,6 +27,8 @@ class ControlNode:
         self.app.add_url_rule('/send', 'send_data', self.send_data, methods=['POST'])
         self.app.add_url_rule('/receive', 'receive_data', self.receive_data)
         self.app.add_url_rule('/', 'index', self.index)
+        self.socketio.on_event('connect', self.handle_connect)
+        self.socketio.on_event('disconnect', self.handle_disconnect)
 
     def add_node(self, address):
         if address not in self.node_list:
@@ -47,6 +57,10 @@ class ControlNode:
             address_to_copy = self.node_list[index_to_copy+1]
         result = rq.post(f"http://{self.user_host}:{address_to_send}/send", data=request.data.decode("utf-8"))
         result_copy = rq.post(f"http://{self.user_host}:{address_to_copy}/sendCopy", data=request.data.decode("utf-8"))
+
+        self.get_stats()
+        self.update_diagram()
+
         return make_response()
 
     def receive_data(self):
@@ -63,6 +77,9 @@ class ControlNode:
         with open("result.txt", "a") as file:
             if result.text != '':
                 file.write(result.text + '\n')
+
+        self.get_stats()
+        self.update_diagram()
         
         return result.text.encode("utf-8")
  
@@ -134,6 +151,48 @@ class ControlNode:
                     break
 
         return self.stats
+    
+    def generate_diagram(self):
+        servers = list(self.stats.keys())
+        main_server_load = [value[0] for value in self.stats.values()]
+        copy_server_load = [value[1] for value in self.stats.values()]
+
+        bar_width = 0.35
+        index = range(len(servers))
+
+        fig, ax = plt.subplots()
+        bar1 = ax.bar(index, main_server_load, bar_width, label='Основний сервер', color='blue')
+        bar2 = ax.bar([i + bar_width for i in index], copy_server_load, bar_width, label='Копія збережена в сервері', color='orange')
+        ax.bar_label(bar1, padding=1)
+        ax.bar_label(bar2, padding=1)
+
+        ax.set_xlabel('Сервери')
+        ax.set_ylabel('Загруженість')
+        ax.set_title('Загруженість серверів')
+        ax.set_xticks([i + bar_width/2 for i in index])
+        ax.set_xticklabels(servers)
+        ax.legend()
+
+
+        # Збереження графіка в байтовий об'єкт
+        buffer = BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
+        plt.close()
+
+        # Кодування зображення в base64
+        image_base64 = base64.b64encode(buffer.read()).decode('utf-8')
+
+        return image_base64
+    
+    def update_diagram(self):
+        self.socketio.emit('chart_updated', {'chart_image': self.generate_diagram()})
+
+    def handle_connect(self):
+        print('Client connected')
+
+    def handle_disconnect(self):
+        print('Client disconnected')
 
     def index(self):
         return render_template('index.html')
